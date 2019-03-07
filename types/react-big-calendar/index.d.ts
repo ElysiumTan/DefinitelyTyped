@@ -7,6 +7,7 @@
 //                 Paul Potsides <https://github.com/strongpauly>
 //                 janb87 <https://github.com/janb87>
 //                 Daniel Thorne <https://github.com/ldthorne>
+//                 Tande <https://github.com/ElysiumTan>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.8
 import { Validator } from 'prop-types';
@@ -113,8 +114,23 @@ export interface HeaderProps {
     localizer: DateLocalizer;
 }
 
+export interface DateHeaderProps {
+    date: Date;
+    drilldownView: View | null;
+    label: string;
+    isOffRange: boolean;
+    onDrillDown: (date: Date, view: View) => void;
+}
+
+export interface EventComponent<T extends Event = Event> {
+    event: T;
+    title: string;
+    isAllDay: boolean;
+    localizer: DateLocalizer;
+}
+
 export interface Components {
-    event?: React.ComponentType<EventProps>;
+    event?: React.ComponentType<EventComponent>;
     eventWrapper?: React.ComponentType<EventWrapperProps>;
     eventContainerWrapper?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
     dayWrapper?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
@@ -128,17 +144,17 @@ export interface Components {
         event?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
     };
     day?: {
-        header?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
-        event?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
+        header?: React.ComponentType<HeaderProps>;
+        event?: React.ComponentType<EventComponent>;
     };
     week?: {
-        header?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
-        event?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
+        header?: React.ComponentType<HeaderProps>;
+        event?: React.ComponentType<EventComponent>;
     };
     month?: {
-        header?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
-        dateHeader?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
-        event?: React.SFC | React.Component | React.ComponentClass | JSX.Element;
+        header?: React.ComponentType<HeaderProps>;
+        dateHeader?: React.ComponentType<DateHeaderProps>;
+        event?: React.ComponentType<EventComponent>;
     };
     /**
      * component used as a header for each column in the TimeGridHeader
@@ -165,6 +181,7 @@ export interface EventProps<T extends Event = Event> {
 export interface EventWrapperProps<T extends Event = Event> {
     // https://github.com/intljusticemission/react-big-calendar/blob/27a2656b40ac8729634d24376dff8ea781a66d50/src/TimeGridEvent.js#L28
     style?: React.CSSProperties & { xOffset: number };
+    children?: React.ReactNode;
     className: string;
     event: T;
     isRtl: boolean;
@@ -238,8 +255,8 @@ export interface BigCalendarProps<TEvent extends Event = Event, TResource extend
     onSelectSlot?: (slotInfo: { start: stringOrDate, end: stringOrDate, slots: Date[] | string[], action: 'select' | 'click' | 'doubleClick' }) => void;
     onDoubleClickEvent?: (event: TEvent, e: React.SyntheticEvent<HTMLElement>) => void;
     onSelectEvent?: (event: TEvent, e: React.SyntheticEvent<HTMLElement>) => void;
-    onSelecting?: (range: { start: stringOrDate, end: stringOrDate }) => boolean | undefined | null;
-    onRangeChange?: (range: { start: stringOrDate, end: stringOrDate }) => void;
+    onSelecting?: (range: { start: stringOrDate; end: stringOrDate }) => boolean | undefined | null;
+    onRangeChange?: (range: { start: stringOrDate; end: stringOrDate }) => void;
     selected?: any;
     views?: Views;
     drilldownView?: View | null;
@@ -247,7 +264,7 @@ export interface BigCalendarProps<TEvent extends Event = Event, TResource extend
     length?: number;
     toolbar?: boolean;
     popup?: boolean;
-    popupOffset?: number | { x: number, y: number };
+    popupOffset?: number | { x: number; y: number };
     selectable?: boolean | 'ignoreEvents';
     longPressThreshold?: number;
     step?: number;
@@ -290,9 +307,9 @@ export interface MoveOptions {
 
 export default class BigCalendar<TEvent extends Event = Event, TResource extends object = object> extends React.Component<BigCalendarProps<TEvent, TResource>> {
     components: {
-        dateCellWrapper: React.ComponentType,
-        dayWrapper: React.ComponentType,
-        eventWrapper: React.ComponentType,
+        dateCellWrapper: React.ComponentType;
+        dayWrapper: React.ComponentType;
+        eventWrapper: React.ComponentType;
     };
     /**
      * create DateLocalizer from globalize
@@ -306,10 +323,10 @@ export default class BigCalendar<TEvent extends Event = Event, TResource extends
      * action constants for Navigate
      */
     static Navigate: {
-        PREVIOUS: 'PREV',
-        NEXT: 'NEXT',
-        TODAY: 'TODAY',
-        DATE: 'DATE',
+        PREVIOUS: 'PREV';
+        NEXT: 'NEXT';
+        TODAY: 'TODAY';
+        DATE: 'DATE';
     };
     /**
      * action constants for View
